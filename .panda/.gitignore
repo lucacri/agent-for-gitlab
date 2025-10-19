@@ -1,0 +1,84 @@
+# Panda Development Tool - .panda directory gitignore
+# This file should be placed in the .panda directory of your project
+#
+# NOTE: The .panda directory itself is NOT in the main .gitignore
+# This allows development tools to see and process these files.
+# Git hooks automatically prevent .panda files from being committed.
+# See .panda/README.md for setup instructions.
+#
+# IMPORTANT: Ensure .claude/ directory is NOT in your main .gitignore
+# Claude Code needs access to .claude/commands/ and other .claude files
+
+# Distributed files (regenerated during panda-cli refresh)
+# These files are copied from Panda CLI resources and should not be tracked
+system/
+claude-file.md
+workspace/contexts/README.md
+workspace/command-notes/README.md
+
+# Runtime state files (internal Panda state)
+runtime/
+
+# Temporary workspace files
+workspace/temps/
+!workspace/temps/new-command
+
+# Session tracking (user-specific)
+sessions/
+workspace/sessions/
+
+# Notification logs (user-specific)
+notification_logs.json
+
+# Status tracking (user-specific)
+runtime/status/
+
+# Hook execution logs
+hooks/*.log
+hooks/**/*.log
+
+# General log files
+**/*.log
+*.log
+
+# Cache files (for future use)
+**/*.cache
+*.cache
+
+# Backup files
+**/*.bak
+**/*~
+*.bak
+*~
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editor temporary files
+*.swp
+*.swo
+*~
+.*.swp
+.*.swo
+
+# Lock files (if any tools create them)
+*.lock
+.lock
+
+# Temporary debug/analysis files
+*.tmp
+*.temp
+debug-*
+analysis-*
+
+# Personal notes that shouldn't be committed
+personal-notes.md
+private-notes.md
+TODO-personal.md
+
+# Project-specific command overrides (usually project-specific)
+# Uncomment the next line if command-notes should not be shared with team
+# command-notes/

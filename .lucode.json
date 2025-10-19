@@ -1,0 +1,11 @@
+{
+  "name": "agent-for-gitlab",
+  "description": "Project: agent-for-gitlab",
+  "docker": {
+    "first_boot_script": null,
+    "restart_script": null,
+    "pre_stop_script": null,
+    "post_stop_script": null,
+    "environment": []
+  }
+}
