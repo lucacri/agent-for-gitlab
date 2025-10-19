@@ -2,8 +2,8 @@ import logger from "./logger.js";
 import { buildContext } from "./context.js";
 import { postComment } from "./gitlab.js";
 import { isInsideGitRepo, setupLocalRepository, ensureBranch } from "./git.js";
-import { validateProviderKeys, validateConfig } from "./config.js";
-import { runOpencode } from "./opencode.js";
+import { validateConfig } from "./config.js";
+import { runClaude, checkClaudeAuth } from "./claude.js";
 import { writeOutput } from "./output.js";
 import { gitSetup } from "./git.js";
 
@@ -32,18 +32,14 @@ export async function run() {
 
     // await postComment(context, "🤖 Getting the vibes started...");
 
-    const hasAnyProviderKey = validateProviderKeys();
-    if (!hasAnyProviderKey) {
-      logger.warn(
-        "No provider API key detected in env. opencode may fail to start unless credentials are pre-configured via 'opencode auth login'.",
-      );
-    }
+    // Check Claude authentication early
+    checkClaudeAuth();
 
     logger.info(`Working directory: ${process.cwd()}`); // Should be /opt/agent/repo
 
-    await runOpencode(context, context.prompt);
+    await runClaude(context, context.prompt);
 
-    logger.info(`Working directory after opencode: ${process.cwd()}`);
+    logger.info(`Working directory after Claude Code: ${process.cwd()}`);
 
     writeOutput(true, {
       prompt: context.prompt,
