@@ -1,2 +1,11 @@
 ./gitlab-app/node_modules
 ./agent-image/node_modules
+
+# Panda distributed and runtime files
+.panda/system/
+.panda/claude-file.md
+.panda/runtime/
+.panda/local/contexts/README.md
+.panda/local/command-notes/README.md
+.claude-project/
+.claude
