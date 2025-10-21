@@ -7,7 +7,8 @@ stages:
 
 variables:
   # Specify the prebuilt agent image containing the runner and Claude Code CLI
-  AI_AGENT_IMAGE: "ghcr.io/schickli/agent-for-gitlab/agent-image:latest"
+  # Available at: https://hub.docker.com/r/lucacri/agent-for-gitlab
+  AI_AGENT_IMAGE: "lucacri/agent-for-gitlab:latest"
 
   # AI_MODEL: Claude model to use (optional, defaults to "sonnet")
   # Options: "sonnet", "opus", "haiku", or full model ID like "claude-sonnet-4-20250514"
