@@ -37,7 +37,7 @@ export async function runClaude(context, prompt) {
   const args = [
     '-p', prompt,
     '--model', getClaudeModel(context.aiModel),
-    '--allowedTools', 'Read', 'Write', 'Edit', 'Bash', 'Grep', 'Glob'
+    '--dangerously-skip-permissions'
   ];
 
   if (context.aiInstructions) {

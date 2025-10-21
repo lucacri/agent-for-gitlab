@@ -52,11 +52,25 @@ The agent image in `agent-image/` serves as the reusable base for CI jobs that r
   - Source and available tags: <https://github.com/DotNet-Docker-Images/dotnet-nodejs-docker>
 - Includes git, curl, jq, Claude Code CLI, and the modular runner (`ai-runner`).
 
-Build and publish the image to your registry of choice, or use the prebuilt one and reference it in CI via the `AI_AGENT_IMAGE` variable.
+Build and publish the image to your registry of choice, or use the prebuilt one from Docker Hub.
 
-Then set in your GitLab CI/CD variables:
+**Using the prebuilt image:**
 
-- `AI_AGENT_IMAGE=ghcr.io/schickli/ai-code-for-gitlab/agent-image:latest`
+The image is automatically built and published to Docker Hub on every release:
+- Latest: `lucacri/agent-for-gitlab:latest`
+- Specific version: `lucacri/agent-for-gitlab:v1.0.0`
+- Available on: https://hub.docker.com/r/lucacri/agent-for-gitlab
+
+Set in your GitLab CI/CD variables:
+
+- `AI_AGENT_IMAGE=lucacri/agent-for-gitlab:latest`
+
+**Building your own:**
+```bash
+cd agent-image
+docker build -t your-registry/agent-for-gitlab:latest .
+docker push your-registry/agent-for-gitlab:latest
+```
 
 #### Create Pipeline
 
