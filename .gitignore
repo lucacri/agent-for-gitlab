@@ -1,11 +1,27 @@
 ./gitlab-app/node_modules
 ./agent-image/node_modules
+node_modules/
+*.log
+.env
+.env.*
+!.env.example
+dist/
+build/
 
 # Panda distributed and runtime files
 .panda/system/
 .panda/claude-file.md
 .panda/runtime/
-.panda/local/contexts/README.md
-.panda/local/command-notes/README.md
+.panda/local/
 .claude-project/
 .claude
+
+# OS-specific
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+
+# IDE
+.vscode/
+.idea/

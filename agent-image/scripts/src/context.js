@@ -1,6 +1,6 @@
 export function buildContext() {
-  // Combine prompts: webhook (OPENCODE_AGENT_PROMPT) + pipeline (CUSTOM_AGENT_PROMPT)
-  const webhookAppPrompt = process.env.OPENCODE_AGENT_PROMPT || "";
+  // Combine prompts: webhook (AI_INSTRUCTIONS) + pipeline (CUSTOM_AGENT_PROMPT)
+  const webhookAppPrompt = process.env.AI_INSTRUCTIONS || "";
   const pipelinePrompt = process.env.CUSTOM_AGENT_PROMPT || "";
   let combinedPrompt = "";
   if (webhookAppPrompt && pipelinePrompt) {
@@ -19,8 +19,8 @@ export function buildContext() {
     branch: process.env.AI_BRANCH,
     email: process.env.AI_GITLAB_EMAIL,
     username: process.env.AI_GITLAB_USERNAME,
-    opencodeModel: process.env.OPENCODE_MODEL,
-    agentPrompt: combinedPrompt,
+    aiModel: process.env.AI_MODEL,
+    aiInstructions: combinedPrompt,
     gitlabToken: process.env.GITLAB_TOKEN,
     host: process.env.CI_SERVER_HOST || "gitlab.com",
     projectId: process.env.CI_PROJECT_ID,

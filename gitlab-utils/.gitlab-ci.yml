@@ -6,12 +6,27 @@ stages:
   - ai
 
 variables:
-  # Specify the prebuilt agent image containing the runner and tools
-  AI_AGENT_IMAGE: "ghcr.io/schickli/agent-for-gitlab/agent-image:latest"
-  
+  # Specify the prebuilt agent image containing the runner and Claude Code CLI
+  # Available at: https://hub.docker.com/r/lucacri/agent-for-gitlab
+  AI_AGENT_IMAGE: "lucacri/agent-for-gitlab:latest"
+
+  # AI_MODEL: Claude model to use (optional, defaults to "sonnet")
+  # Options: "sonnet", "opus", "haiku", or full model ID like "claude-sonnet-4-20250514"
+  # AI_MODEL: "sonnet"
+
+  # AI_INSTRUCTIONS: Custom system prompt to append to Claude's instructions (optional)
+  # AI_INSTRUCTIONS: "You are a helpful coding assistant"
+
 ai_webhook_handler:
   stage: ai
   image: $AI_AGENT_IMAGE
+  before_script:
+    # Setup Claude Code authentication
+    - mkdir -p ~/.claude
+    - |
+      if [ -n "$CLAUDE_CREDENTIALS" ]; then
+        echo "$CLAUDE_CREDENTIALS" > ~/.claude/.credentials.json
+      fi
   script:
     - ai-runner
   rules:
