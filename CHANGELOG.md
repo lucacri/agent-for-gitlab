@@ -1,3 +1,10 @@
+## [1.1.0](https://github.com/lucacri/agent-for-gitlab/compare/v1.0.0...v1.1.0) (2025-10-21)
+
+
+### Features
+
+* add GitHub Actions for automated Docker builds and semantic releases ([ca2ed8a](https://github.com/lucacri/agent-for-gitlab/commit/ca2ed8a0d454a34202cf04c9dd6d989ea40c22fb))
+
 ## 1.0.0 (2025-10-21)
 
 
