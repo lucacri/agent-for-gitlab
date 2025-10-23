@@ -90,6 +90,31 @@ You will need to add the following CI/CD variables in your GitLab project (Setti
 
 - `GITLAB_TOKEN`: Your GitLab Personal Access Token (with `api`, `read_repository`, `write_repository` permissions)
 
+#### Docker Configuration - Claude Settings
+
+The agent image supports optional mounting of Claude configuration files for local development and testing:
+
+```bash
+# Run with mounted Claude configuration
+docker run -it --rm \
+  -v ~/.claude:/root/.claude:ro \
+  -v ~/.claude:/claude-config:ro \
+  -v $(pwd):/opt/agent/repo \
+  lucacri/agent-for-gitlab \
+  ai-runner --model sonnet "Analyze this code"
+```
+
+**Mount Points:**
+- `/root/.claude` - Claude credentials directory (contains `.credentials.json`)
+- `/claude-config` - Configuration directory (contains `.claude.json`)
+
+**Authentication Priority:**
+1. Mounted configuration files (if present)
+2. Existing credentials in the image
+3. `ANTHROPIC_API_KEY` environment variable
+
+See [`agent-image/README.md`](agent-image/README.md) for detailed configuration mounting documentation and usage patterns.
+
 Optional configuration variables:
 
 - `AI_MODEL`: Claude model to use (default: `"sonnet"`)

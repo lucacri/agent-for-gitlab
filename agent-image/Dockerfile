@@ -41,6 +41,13 @@ RUN cd /opt/agent && npm install --production
 RUN printf "#!/usr/bin/env sh\nnode /opt/agent/ai-runner.js \"$@\"\n" > /usr/local/bin/ai-runner \
 	&& chmod +x /usr/local/bin/ai-runner
 
+# Copy and configure entrypoint script for optional config mounting
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Set entrypoint to handle configuration mounting
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
 # Default shell; CI jobs will invoke `ai-runner`
 CMD ["sh"]
 
