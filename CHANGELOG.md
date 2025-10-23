@@ -1,3 +1,10 @@
+## [1.2.0](https://github.com/lucacri/agent-for-gitlab/compare/v1.1.1...v1.2.0) (2025-10-23)
+
+
+### Features
+
+* add optional Claude configuration mounting to agent-image ([485b4b4](https://github.com/lucacri/agent-for-gitlab/commit/485b4b46a19ddbdb5c7361e19ac407af53503eb7))
+
 ## [1.1.1](https://github.com/lucacri/agent-for-gitlab/compare/v1.1.0...v1.1.1) (2025-10-23)
 
 ## [1.1.0](https://github.com/lucacri/agent-for-gitlab/compare/v1.0.0...v1.1.0) (2025-10-21)
