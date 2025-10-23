@@ -1,11 +1,17 @@
-# `@agent` on Gitlab
+# AI Agent for GitLab
 
 ![Comments Showcase](./docs/assets/header.png)
 
-This is a system that allows you to trigger an agent with the command @agent, which can then search, edit and commit your code, as well as post comments on your GitLab MR or issue.
+This is a system that allows you to trigger an AI agent with the command `@ai` (customizable), which can then search, edit and commit your code, as well as post comments on your GitLab MR or issue.
 The agent runs securely in your pipeline runner.
 
-> This project was forked from [RealMikeChong](https://github.com/RealMikeChong/claude-code-for-gitlab). I used his gitlab webhook app and refactored the runner, added more documentation and Claude Code integration...
+> **Independent Fork**: This project originated from [RealMikeChong's claude-code-for-gitlab](https://github.com/RealMikeChong/claude-code-for-gitlab) but has evolved into an independent product with:
+>
+> - Custom Docker base image optimized for multi-language support (PHP 8.4 CLI + Node.js 24.x + Python via uv)
+> - Modular AI runner architecture with MCP server integration
+> - Enhanced Claude Code CLI integration
+> - Comprehensive documentation and deployment options
+> - Extended feature set and customization capabilities
 
 ## Features
 
@@ -40,32 +46,35 @@ Add the **Comments** trigger for the webhook.
 ### GitLab Pipeline
 
 The agent will run in the GitLab CI/CD environment. This is ideal because that way we already have an isolated environment with all necessary tools and permissions.
-For that, we use the `agent-image` Docker image. This provides the agent with the required dependencies for `C#` and `Node.js`, and the Claude Code CLI. You can easily customize the base image in `agent-image/Dockerfile`.
+For that, we use the `agent-image` Docker image. This provides the agent with the required dependencies for PHP, Node.js, Python, and the Claude Code CLI. You can easily customize the base image in `agent-image/Dockerfile`.
 
 #### Build Agent Image
 
 The agent image in `agent-image/` serves as the reusable base for CI jobs that run AI.
 
-- Base image: `dotnetimages/microsoft-dotnet-core-sdk-nodejs:8.0_24.x`
-  - .NET SDK version: 8 (can be changed)
-  - Node.js version: 24.x (can also be changed)
-  - Source and available tags: <https://github.com/DotNet-Docker-Images/dotnet-nodejs-docker>
+- Base image: `php:8.4-cli`
+  - PHP version: 8.4 with Xdebug support
+  - Node.js version: 24.x
+  - Python package manager: uv (modern, fast package installer)
 - Includes git, curl, jq, Claude Code CLI, and the modular runner (`ai-runner`).
 
 Build and publish the image to your registry of choice, or use the prebuilt one from Docker Hub.
 
 **Using the prebuilt image:**
 
-The image is automatically built and published to Docker Hub on every release:
+The agent image is automatically built and published to Docker Hub:
+
 - Latest: `lucacri/agent-for-gitlab:latest`
-- Specific version: `lucacri/agent-for-gitlab:v1.0.0`
-- Available on: https://hub.docker.com/r/lucacri/agent-for-gitlab
+- Available on: <https://hub.docker.com/r/lucacri/agent-for-gitlab>
 
-Set in your GitLab CI/CD variables:
+This is already configured in [gitlab-utils/.gitlab-ci.yml](gitlab-utils/.gitlab-ci.yml):
 
-- `AI_AGENT_IMAGE=lucacri/agent-for-gitlab:latest`
+```yaml
+AI_AGENT_IMAGE: "lucacri/agent-for-gitlab:latest"
+```
 
 **Building your own:**
+
 ```bash
 cd agent-image
 docker build -t your-registry/agent-for-gitlab:latest .
@@ -99,11 +108,7 @@ You can run the prebuilt image locally:
 
 > When using it locally, you must expose your local port 3000 to the internet using either ngrok or the built-in port forwarding from VS Code. You must also change it in the webhook configuration.
 
-Pull the image from the GitHub Container Registry:
-
-```bash
-docker pull ghcr.io/schickli/ai-code-for-gitlab/gitlab-app:latest
-````
+The GitLab webhook app runs separately from the CI agent. You can either build it locally or use docker-compose (see below).
 
 > All configuration options can be seen in `.env.example` or the **Configuration** section.
 > With this you only build the GitLab Webhook App.
