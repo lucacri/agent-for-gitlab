@@ -1,3 +1,5 @@
+## [1.1.1](https://github.com/lucacri/agent-for-gitlab/compare/v1.1.0...v1.1.1) (2025-10-23)
+
 ## [1.1.0](https://github.com/lucacri/agent-for-gitlab/compare/v1.0.0...v1.1.0) (2025-10-21)
 
 
