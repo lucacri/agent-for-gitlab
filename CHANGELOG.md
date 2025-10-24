@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.0...v1.2.1) (2025-10-24)
+
+
+### Bug Fixes
+
+* update Docker image names in GitHub workflows ([6983582](https://github.com/lucacri/agent-for-gitlab/commit/69835828f1e8cb6b108e2297ab8a3a60afe59e7f))
+
 ## [1.2.0](https://github.com/lucacri/agent-for-gitlab/compare/v1.1.1...v1.2.0) (2025-10-23)
 
 
