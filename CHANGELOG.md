@@ -1,3 +1,10 @@
+## [1.2.11](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.10...v1.2.11) (2025-10-24)
+
+
+### Bug Fixes
+
+* execute Claude CLI with node explicitly to bypass shebang issue ([8609dd0](https://github.com/lucacri/agent-for-gitlab/commit/8609dd00a65055ae11ae4c9b5a9f6421162fdfaa))
+
 ## [1.2.10](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.9...v1.2.10) (2025-10-24)
 
 
