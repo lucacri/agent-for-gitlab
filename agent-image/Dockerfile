@@ -32,6 +32,9 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
 # Install Claude Code CLI
 RUN npm install -g @anthropic-ai/claude-code
 
+# Verify Claude CLI is available (the package installs as 'claude' command)
+RUN which claude || (echo "ERROR: claude command not found after installation" && exit 1)
+
 # Copy runner sources
 WORKDIR /opt/agent
 COPY scripts/ /opt/agent/
