@@ -1,3 +1,10 @@
+## [1.2.14](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.13...v1.2.14) (2025-10-24)
+
+
+### Bug Fixes
+
+* configure Git to trust mounted repo directories ([fffa4a0](https://github.com/lucacri/agent-for-gitlab/commit/fffa4a04fda845344824ec76d5f3e40564ec59bb))
+
 ## [1.2.13](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.12...v1.2.13) (2025-10-24)
 
 
