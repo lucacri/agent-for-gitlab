@@ -1,0 +1,217 @@
+# GitLab CI/CD Configuration for AI Code Webhook Server
+# SHELL EXECUTOR VERSION with Docker Run
+#
+# This version uses the shell executor and runs the agent via `docker run`
+# This gives you full control over volume mounts and is ideal for:
+# - Self-hosted GitLab runners
+# - Local development and testing
+# - Custom Claude profile management
+# - Advanced Docker configuration needs
+
+stages:
+  - ai
+
+variables:
+  # Specify the prebuilt agent image containing the runner and Claude Code CLI
+  # Available at: https://hub.docker.com/r/lucacri/agent-for-gitlab
+  AI_AGENT_IMAGE: "lucacri/agent-for-gitlab:latest"
+
+  # Location of Claude profile on the GitLab runner host
+  # Default: ~/agent-for-gitlab
+  # This directory should contain .claude/ folder and optionally .claude.json
+  CLAUDE_PROFILE_DIR: "~/agent-for-gitlab"
+
+  # AI_MODEL: Claude model to use (optional, defaults to "sonnet")
+  # Options: "sonnet", "opus", "haiku", or full model ID like "claude-sonnet-4-20250514"
+  # AI_MODEL: "sonnet"
+
+  # AI_INSTRUCTIONS: Custom system prompt to append to Claude's instructions (optional)
+  # AI_INSTRUCTIONS: "You are a helpful coding assistant"
+
+# ============================================================================
+# SETUP REQUIRED ON GITLAB RUNNER HOST:
+# ============================================================================
+#
+# 1. Create Claude profile directory:
+#    mkdir -p ~/agent-for-gitlab/.claude
+#
+# 2. Add credentials to the profile:
+#
+#    Option A: Interactive login (recommended)
+#      docker run -it --rm \
+#        -v ~/agent-for-gitlab/.claude:/root/.claude:rw \
+#        lucacri/agent-for-gitlab:latest \
+#        sh -c "claude login && exit"
+#
+#    Option B: Copy existing credentials
+#      cp ~/.claude/.credentials.json ~/agent-for-gitlab/.claude/
+#
+# 3. (Optional) Create Claude configuration:
+#    cat > ~/agent-for-gitlab/.claude.json <<EOF
+#    {
+#      "defaultModel": "sonnet",
+#      "maxTokens": 8192
+#    }
+#    EOF
+#
+# 4. Set permissions:
+#    chmod 700 ~/agent-for-gitlab/.claude
+#    chmod 600 ~/agent-for-gitlab/.claude/.credentials.json
+#    chmod 600 ~/agent-for-gitlab/.claude.json
+#
+# 5. Ensure gitlab-runner user can run Docker:
+#    sudo usermod -aG docker gitlab-runner
+#    sudo gitlab-runner restart
+#
+# ============================================================================
+
+# ============================================================================
+# AUTHENTICATION METHODS:
+# ============================================================================
+#
+# Method 1: Mounted Profile (RECOMMENDED for shell executor)
+#   - Creates profile directory on runner host: ~/agent-for-gitlab/
+#   - Contains .claude/ folder with credentials
+#   - Optionally contains .claude.json for configuration
+#   - No CI/CD variables needed for Claude auth!
+#   - Easy to update: just edit files on host
+#
+# Method 2: Environment Variable
+#   - Set CLAUDE_CODE_OAUTH_TOKEN in GitLab CI/CD variables
+#   - Value: sk-ant-oat01-xxxxx (your OAuth token)
+#   - Type: Variable, Flags: ✅ Masked
+#   - Simpler but less flexible than mounted profile
+#
+# Method 3: Hybrid
+#   - Use mounted profile for credentials
+#   - Use environment variables for per-project configuration
+#
+# ============================================================================
+
+ai_webhook_handler:
+  stage: ai
+  tags:
+    - shell  # MUST use shell executor (not docker executor)
+
+  script:
+    # Run the agent container with volume mounts
+    - |
+      docker run --rm \
+        -v /etc/ssl/certs:/etc/ssl/certs:ro \
+        -v ${CLAUDE_PROFILE_DIR}/.claude:/root/.claude:rw \
+        -v ${CLAUDE_PROFILE_DIR}/.claude.json:/root/.claude.json:rw \
+        -v $(pwd):/opt/agent/repo \
+        -e GITLAB_TOKEN="${GITLAB_TOKEN}" \
+        -e CI_SERVER_HOST="${CI_SERVER_HOST}" \
+        -e CI_SERVER_URL="${CI_SERVER_URL}" \
+        -e CI_PROJECT_ID="${CI_PROJECT_ID}" \
+        -e AI_TRIGGER="${AI_TRIGGER}" \
+        -e AI_PROJECT_PATH="${AI_PROJECT_PATH}" \
+        -e AI_AUTHOR="${AI_AUTHOR}" \
+        -e AI_RESOURCE_TYPE="${AI_RESOURCE_TYPE}" \
+        -e AI_RESOURCE_ID="${AI_RESOURCE_ID}" \
+        -e AI_DISCUSSION_ID="${AI_DISCUSSION_ID}" \
+        -e AI_BRANCH="${AI_BRANCH}" \
+        -e AI_GITLAB_EMAIL="${AI_GITLAB_EMAIL}" \
+        -e AI_GITLAB_USERNAME="${AI_GITLAB_USERNAME}" \
+        -e AI_MODEL="${AI_MODEL}" \
+        -e DIRECT_PROMPT="${DIRECT_PROMPT}" \
+        -e CUSTOM_AGENT_PROMPT="${CUSTOM_AGENT_PROMPT}" \
+        -e AI_INSTRUCTIONS="${AI_INSTRUCTIONS}" \
+        ${AI_AGENT_IMAGE} \
+        ai-runner
+
+  rules:
+    # Only run when triggered by @ai comment webhook
+    - if: '$AI_TRIGGER == "true"'
+
+  artifacts:
+    paths:
+      - ai-output.json
+    expire_in: 1 week
+
+  allow_failure: true  # Don't block other pipelines if AI fails
+
+# ============================================================================
+# VOLUME MOUNTS EXPLAINED:
+# ============================================================================
+#
+# -v /etc/ssl/certs:/etc/ssl/certs:ro
+#   → Mounts system SSL certificates (required for private GitLab instances)
+#
+# -v ${CLAUDE_PROFILE_DIR}/.claude:/root/.claude:rw
+#   → Mounts Claude credentials directory (contains .credentials.json)
+#   → Read-write so Claude can update session data
+#
+# -v ${CLAUDE_PROFILE_DIR}/.claude.json:/root/.claude.json:rw
+#   → Mounts Claude configuration file (optional)
+#   → Read-write so you can update config from host
+#
+# -v $(pwd):/opt/agent/repo
+#   → Mounts the Git repository into the container
+#   → $(pwd) is the GitLab checkout directory
+#
+# ============================================================================
+
+# ============================================================================
+# TROUBLESHOOTING:
+# ============================================================================
+#
+# Error: "Permission denied" accessing mounted files
+#   Solution: Check file permissions on host
+#     chmod 700 ~/agent-for-gitlab/.claude
+#     chmod 600 ~/agent-for-gitlab/.claude/.credentials.json
+#
+# Error: "No such file or directory" for mounted files
+#   Solution: Verify files exist on runner host
+#     ls -la ~/agent-for-gitlab/.claude/
+#
+# Error: "Problem with the SSL CA cert"
+#   Solution: Ensure /etc/ssl/certs is mounted
+#     Already included in script above
+#
+# Error: "dubious ownership in repository"
+#   Solution: Already fixed in latest image (v2025-10-24+)
+#     Rebuild image if using older version
+#
+# Error: "Authentication failed" (401)
+#   Solution: Check GITLAB_TOKEN is set in CI/CD variables
+#     Settings → CI/CD → Variables → GITLAB_TOKEN
+#
+# Claude auth error but files exist
+#   Solution: Test credentials manually:
+#     docker run -it --rm \
+#       -v ~/agent-for-gitlab/.claude:/root/.claude:ro \
+#       lucacri/agent-for-gitlab:latest \
+#       sh -c "ls -la ~/.claude/ && cat ~/.claude/.credentials.json"
+#
+# ============================================================================
+
+# ============================================================================
+# ADVANCED: MULTIPLE PROFILES
+# ============================================================================
+#
+# You can maintain multiple Claude profiles on the runner host:
+#
+# ~/agent-for-gitlab/profiles/
+# ├── production/.claude/
+# ├── development/.claude/
+# └── testing/.claude/
+#
+# Then use different variables or runner tags to select profiles:
+#
+# ai_production:
+#   extends: .ai_base
+#   variables:
+#     CLAUDE_PROFILE_DIR: "~/agent-for-gitlab/profiles/production"
+#   only:
+#     - main
+#
+# ai_development:
+#   extends: .ai_base
+#   variables:
+#     CLAUDE_PROFILE_DIR: "~/agent-for-gitlab/profiles/development"
+#   only:
+#     - develop
+#
+# ============================================================================
