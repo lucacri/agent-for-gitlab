@@ -1,3 +1,10 @@
+## [1.2.13](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.12...v1.2.13) (2025-10-24)
+
+
+### Bug Fixes
+
+* handle empty prompts with default message ([5e47019](https://github.com/lucacri/agent-for-gitlab/commit/5e4701946b602fdde5fae87ffbb118d93041b959))
+
 ## [1.2.12](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.11...v1.2.12) (2025-10-24)
 
 
