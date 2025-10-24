@@ -76,12 +76,14 @@ export async function runClaude(context, prompt) {
   // Execute with node explicitly instead of relying on shebang
   // This avoids issues with #!/usr/bin/env node not finding node in spawnSync context
   logger.info(`Executing: node ${realPath} ${args.join(' ')}`);
+  logger.info(`Current working directory: ${process.cwd()}`);
 
   const result = spawnSync('node', [realPath, ...args], {
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'pipe'],
     maxBuffer: 10 * 1024 * 1024,
-    cwd: '/opt/agent/repo',
+    // cwd removed - inherit current directory from process.cwd()
+    // GitLab CI mounts to /builds/<project>, not /opt/agent/repo
     env: process.env
   });
 
