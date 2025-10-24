@@ -1,3 +1,10 @@
+## [1.2.12](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.11...v1.2.12) (2025-10-24)
+
+
+### Bug Fixes
+
+* remove hardcoded cwd that doesn't exist in GitLab CI ([062a897](https://github.com/lucacri/agent-for-gitlab/commit/062a897de279b121ed2737638e770ff58ab9c98a))
+
 ## [1.2.11](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.10...v1.2.11) (2025-10-24)
 
 
