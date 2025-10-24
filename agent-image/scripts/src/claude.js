@@ -63,6 +63,33 @@ export async function runClaude(context, prompt) {
   }
 
   logger.info(`Found Claude CLI at: ${claudePath}`);
+
+  // Debug: Inspect the claude binary
+  const lsResult = spawnSync('ls', ['-la', claudePath], {
+    encoding: 'utf8',
+    env: process.env
+  });
+  logger.info(`ls -la ${claudePath}: ${lsResult.stdout || 'no output'}`);
+
+  const fileResult = spawnSync('file', [claudePath], {
+    encoding: 'utf8',
+    env: process.env
+  });
+  logger.info(`file ${claudePath}: ${fileResult.stdout || 'no output'}`);
+
+  const readlinkResult = spawnSync('readlink', ['-f', claudePath], {
+    encoding: 'utf8',
+    env: process.env
+  });
+  logger.info(`readlink -f ${claudePath}: ${readlinkResult.stdout?.trim() || 'not a symlink'}`);
+
+  // If it's a script, check the shebang
+  const headResult = spawnSync('head', ['-n', '1', claudePath], {
+    encoding: 'utf8',
+    env: process.env
+  });
+  logger.info(`First line of ${claudePath}: ${headResult.stdout?.trim() || 'no output'}`);
+
   logger.info(`Executing: ${claudePath} ${args.join(' ')}`);
 
   // Use full path instead of relying on PATH resolution in spawnSync
