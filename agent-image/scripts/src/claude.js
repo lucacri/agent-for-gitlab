@@ -46,16 +46,15 @@ export async function runClaude(context, prompt) {
 
   logger.info(`Claude args: ${args.join(' ')}`);
 
-  // Execute the Claude CLI using the absolute path to the installed binary
-  const claudePath = '/usr/bin/claude';
+  // Execute the Claude CLI - let PATH resolve the binary location
+  logger.info(`Executing: claude ${args.join(' ')}`);
 
-  logger.info(`Executing: ${claudePath} ${args.join(' ')}`);
-
-  const result = spawnSync(claudePath, args, {
+  const result = spawnSync('claude', args, {
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'pipe'],
     maxBuffer: 10 * 1024 * 1024,
-    cwd: '/opt/agent/repo'
+    cwd: '/opt/agent/repo',
+    env: process.env  // Inherit environment including PATH
   });
 
   if (result.error) {
@@ -67,9 +66,10 @@ export async function runClaude(context, prompt) {
       throw new Error(
         `Failed to execute Claude CLI.\n` +
         `Error: ${result.error.message}\n` +
-        `CLI path: ${claudePath}\n` +
+        `Command: claude\n` +
+        `PATH: ${process.env.PATH}\n` +
         `Working directory: /opt/agent/repo\n` +
-        `Check that Claude Code CLI is installed correctly.`
+        `Check that Claude Code CLI is installed and in PATH.`
       );
     }
     throw result.error;
