@@ -1,3 +1,5 @@
+## [1.2.15](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.14...v1.2.15) (2025-10-24)
+
 ## [1.2.14](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.13...v1.2.14) (2025-10-24)
 
 
