@@ -98,7 +98,7 @@ The agent image supports optional mounting of Claude configuration files for loc
 # Run with mounted Claude configuration
 docker run -it --rm \
   -v ~/.claude:/root/.claude:ro \
-  -v ~/.claude:/claude-config:ro \
+  -v ~/.claude.json:/claude-config/.claude.json:ro \
   -v $(pwd):/opt/agent/repo \
   lucacri/agent-for-gitlab \
   ai-runner --model sonnet "Analyze this code"
@@ -106,7 +106,7 @@ docker run -it --rm \
 
 **Mount Points:**
 - `/root/.claude` - Claude credentials directory (contains `.credentials.json`)
-- `/claude-config` - Configuration directory (contains `.claude.json`)
+- `/claude-config/.claude.json` - Configuration file (mount `~/.claude.json` here)
 
 **Authentication Priority:**
 1. Mounted configuration files (if present)

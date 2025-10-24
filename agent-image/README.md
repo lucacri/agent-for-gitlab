@@ -35,10 +35,10 @@ The container supports three authentication methods:
 ### Using Mounted Configuration
 
 ```bash
-# Mount both configuration and credentials
+# Mount credentials directory and config file
 docker run -it --rm \
   -v ~/.claude:/root/.claude:ro \
-  -v ~/.claude:/claude-config:ro \
+  -v ~/.claude.json:/claude-config/.claude.json:ro \
   -v $(pwd):/opt/agent/repo \
   lucacri/agent-for-gitlab \
   ai-runner --model sonnet "Analyze this codebase"
@@ -116,22 +116,33 @@ The container tries authentication methods in this order:
 
 ## Usage Patterns
 
-### Pattern 1: Everything from ~/.claude
+### Pattern 1: Config file in home directory
 
-Mount both configuration and credentials from the same directory:
+Mount credentials directory and config file separately:
 
 ```bash
 docker run -it --rm \
   -v ~/.claude:/root/.claude:ro \
-  -v ~/.claude:/claude-config:ro \
+  -v ~/.claude.json:/claude-config/.claude.json:ro \
   -v $(pwd):/opt/agent/repo \
   lucacri/agent-for-gitlab \
   ai-runner
 ```
 
-### Pattern 2: Separate Locations
+### Pattern 2: Config in separate directory
 
-Use different directories for configuration and credentials:
+If you keep `.claude.json` in a separate directory:
+
+```bash
+docker run -it --rm \
+  -v ~/.claude:/root/.claude:ro \
+  -v ~/my-config/.claude.json:/claude-config/.claude.json:ro \
+  -v $(pwd):/opt/agent/repo \
+  lucacri/agent-for-gitlab \
+  ai-runner
+```
+
+**Alternative:** Mount entire config directory if it contains `.claude.json`:
 
 ```bash
 docker run -it --rm \
@@ -154,7 +165,7 @@ services:
     image: lucacri/agent-for-gitlab:latest
     volumes:
       - ~/.claude:/root/.claude:ro
-      - ~/.claude:/claude-config:ro
+      - ~/.claude.json:/claude-config/.claude.json:ro
       - ./project:/opt/agent/repo
     command: ai-runner --model sonnet "Review this code"
     stdin_open: true

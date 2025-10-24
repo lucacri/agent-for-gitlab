@@ -38,7 +38,7 @@ cp ~/.claude.json ~/my-claude-config/  # Or create a new one
 ```bash
 docker run -it --rm \
   -v ~/.claude:/root/.claude:ro \
-  -v ~/my-claude-config:/claude-config:ro \
+  -v ~/.claude.json:/claude-config/.claude.json:ro \
   -v $(pwd):/opt/agent/repo \
   lucacri/agent-for-gitlab \
   ai-runner --model sonnet "Analyze this codebase"
@@ -46,7 +46,7 @@ docker run -it --rm \
 
 **What This Does**:
 - Mounts your `.claude/` credentials folder → container can authenticate
-- Mounts your config directory → `.claude.json` copied at startup
+- Mounts your `.claude.json` config file → copied to `/root/.claude.json` at startup
 - Mounts current directory → agent can access your code
 - Runs `ai-runner` with sonnet model
 
@@ -66,24 +66,33 @@ ERROR: Failed to copy /claude-config/.claude.json
 
 ## Common Usage Patterns
 
-### Pattern 1: Everything from ~/.claude
+### Pattern 1: Config file in home directory
 
 ```bash
-# If both .claude.json and .claude/ are in same location
+# .claude.json is at ~/.claude.json
 docker run -it --rm \
   -v ~/.claude:/root/.claude:ro \
-  -v ~/.claude:/claude-config:ro \
+  -v ~/.claude.json:/claude-config/.claude.json:ro \
   lucacri/agent-for-gitlab \
   ai-runner
 ```
 
-### Pattern 2: Separate Locations
+### Pattern 2: Config in separate directory
 
 ```bash
-# Different directories for config and credentials
+# .claude.json is in a separate directory like ~/my-config/.claude.json
 docker run -it --rm \
   -v ~/.claude:/root/.claude:ro \
-  -v ~/config:/claude-config:ro \
+  -v ~/my-config/.claude.json:/claude-config/.claude.json:ro \
+  lucacri/agent-for-gitlab \
+  ai-runner
+```
+
+**Alternative:** If the directory contains .claude.json, mount the whole directory:
+```bash
+docker run -it --rm \
+  -v ~/.claude:/root/.claude:ro \
+  -v ~/my-config:/claude-config:ro \
   lucacri/agent-for-gitlab \
   ai-runner
 ```
@@ -100,7 +109,7 @@ services:
     image: lucacri/agent-for-gitlab:latest
     volumes:
       - ~/.claude:/root/.claude:ro
-      - ~/my-claude-config:/claude-config:ro
+      - ~/.claude.json:/claude-config/.claude.json:ro
       - ./project:/opt/agent/repo
     command: ai-runner --model sonnet "Review this code"
     stdin_open: true
@@ -305,7 +314,7 @@ mkdir ~/my-project && cd ~/my-project
 # 3. Run agent with mounted config
 docker run -it --rm \
   -v ~/.claude:/root/.claude:ro \
-  -v ~/.claude:/claude-config:ro \
+  -v ~/.claude.json:/claude-config/.claude.json:ro \
   -v $(pwd):/opt/agent/repo \
   lucacri/agent-for-gitlab \
   ai-runner --model sonnet "Create a Python script to analyze CSV files"
@@ -316,7 +325,7 @@ ls -la  # Agent-generated files appear here
 # 5. Run again with different task (no re-auth needed!)
 docker run -it --rm \
   -v ~/.claude:/root/.claude:ro \
-  -v ~/.claude:/claude-config:ro \
+  -v ~/.claude.json:/claude-config/.claude.json:ro \
   -v $(pwd):/opt/agent/repo \
   lucacri/agent-for-gitlab \
   ai-runner --model sonnet "Add error handling to the script"
