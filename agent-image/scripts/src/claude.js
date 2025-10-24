@@ -46,6 +46,15 @@ export async function runClaude(context, prompt) {
 
   logger.info(`Claude args: ${args.join(' ')}`);
 
+  // Debug: Log PATH and verify claude binary exists
+  logger.info(`NODE process.env.PATH: ${process.env.PATH}`);
+  const whichResult = spawnSync('which', ['claude'], {
+    encoding: 'utf8',
+    env: process.env
+  });
+  logger.info(`which claude result: ${whichResult.stdout || 'NOT FOUND'}`);
+  logger.info(`which claude error: ${whichResult.stderr || 'none'}`);
+
   // Execute the Claude CLI - let PATH resolve the binary location
   logger.info(`Executing: claude ${args.join(' ')}`);
 
