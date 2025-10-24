@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import logger from "./logger.js";
 import { buildContext } from "./context.js";
 import { postComment } from "./gitlab.js";
@@ -9,6 +10,14 @@ import { gitSetup } from "./git.js";
 
 export async function run() {
   logger.info("AI GitLab Runner Started");
+
+  // Log image version for debugging
+  try {
+    const version = readFileSync('/version.txt', 'utf8').trim();
+    logger.info(`Docker Image Version: ${version}`);
+  } catch (err) {
+    logger.info('Docker Image Version: unknown (no /version.txt)');
+  }
 
   const context = buildContext();
 

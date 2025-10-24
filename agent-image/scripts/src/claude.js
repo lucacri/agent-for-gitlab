@@ -46,24 +46,32 @@ export async function runClaude(context, prompt) {
 
   logger.info(`Claude args: ${args.join(' ')}`);
 
-  // Debug: Log PATH and verify claude binary exists
-  logger.info(`NODE process.env.PATH: ${process.env.PATH}`);
+  // Find the full path to claude binary
   const whichResult = spawnSync('which', ['claude'], {
     encoding: 'utf8',
     env: process.env
   });
-  logger.info(`which claude result: ${whichResult.stdout || 'NOT FOUND'}`);
-  logger.info(`which claude error: ${whichResult.stderr || 'none'}`);
 
-  // Execute the Claude CLI - let PATH resolve the binary location
-  logger.info(`Executing: claude ${args.join(' ')}`);
+  const claudePath = whichResult.stdout?.trim();
 
-  const result = spawnSync('claude', args, {
+  if (!claudePath || whichResult.status !== 0) {
+    throw new Error(
+      `Claude CLI not found in PATH.\n` +
+      `PATH: ${process.env.PATH}\n` +
+      `which output: ${whichResult.stderr || 'no output'}`
+    );
+  }
+
+  logger.info(`Found Claude CLI at: ${claudePath}`);
+  logger.info(`Executing: ${claudePath} ${args.join(' ')}`);
+
+  // Use full path instead of relying on PATH resolution in spawnSync
+  const result = spawnSync(claudePath, args, {
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'pipe'],
     maxBuffer: 10 * 1024 * 1024,
     cwd: '/opt/agent/repo',
-    env: process.env  // Inherit environment including PATH
+    env: process.env
   });
 
   if (result.error) {

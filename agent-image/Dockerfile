@@ -51,6 +51,9 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # Set IS_SANDBOX=1 to allow Claude Code CLI to run with --dangerously-skip-permissions in Docker
 ENV IS_SANDBOX=1
 
+# Create version file for debugging
+RUN echo "v2025-10-24-debug-spawnSync" > /version.txt
+
 # Set entrypoint to handle configuration mounting
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
