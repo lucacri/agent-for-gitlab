@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.2...v1.2.3) (2025-10-24)
+
+
+### Bug Fixes
+
+* add verification for Claude CLI installation ([d450f4f](https://github.com/lucacri/agent-for-gitlab/commit/d450f4f3b89b1cc1216f56831925728d1d2a7441))
+
 ## [1.2.2](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.1...v1.2.2) (2025-10-24)
 
 
