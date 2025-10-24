@@ -12,7 +12,12 @@ RUN apt-get update && apt-get install -y \
 	curl \
 	jq \
 	unzip \
+	ca-certificates \
 	&& rm -rf /var/lib/apt/lists/*
+
+# Optional: Copy custom CA certificates if building for private GitLab
+# COPY custom-ca-cert.crt /usr/local/share/ca-certificates/
+# RUN update-ca-certificates
 
 # Install Xdebug (disabled by default, enable via ENV XDEBUG_MODE)
 RUN pecl install xdebug \
