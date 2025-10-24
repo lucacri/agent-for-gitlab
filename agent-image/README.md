@@ -24,6 +24,10 @@ The agent image (`lucacri/agent-for-gitlab`) is a Docker container that includes
 - Claude Code CLI
 - Modular AI runner (`ai-runner`)
 
+**Docker-Specific Configuration:**
+
+The container sets `IS_SANDBOX=1` environment variable to allow Claude Code CLI to run with `--dangerously-skip-permissions` flag in Docker's root user context. This is safe because Docker provides container isolation.
+
 The container supports three authentication methods:
 
 1. **Mounted configuration files** (this feature)

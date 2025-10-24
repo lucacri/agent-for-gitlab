@@ -113,6 +113,9 @@ docker run -it --rm \
 2. Existing credentials in the image
 3. `ANTHROPIC_API_KEY` environment variable
 
+**Container Environment:**
+- The image sets `IS_SANDBOX=1` to enable Claude Code CLI to run safely in Docker's root context
+
 See [`agent-image/README.md`](agent-image/README.md) for detailed configuration mounting documentation and usage patterns.
 
 Optional configuration variables:

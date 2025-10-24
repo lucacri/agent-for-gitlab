@@ -48,6 +48,9 @@ RUN printf "#!/usr/bin/env sh\nnode /opt/agent/ai-runner.js \"$@\"\n" > /usr/loc
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# Set IS_SANDBOX=1 to allow Claude Code CLI to run with --dangerously-skip-permissions in Docker
+ENV IS_SANDBOX=1
+
 # Set entrypoint to handle configuration mounting
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
