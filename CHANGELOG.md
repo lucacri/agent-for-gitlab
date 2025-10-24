@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/lucacri/agent-for-gitlab/compare/v1.3.0...v1.3.1) (2025-10-24)
+
+
+### Bug Fixes
+
+* use oauth2 username for GitLab token authentication ([e15f548](https://github.com/lucacri/agent-for-gitlab/commit/e15f548a45caabdc94df20cc4b43edeac5f42f90))
+
 ## [1.3.0](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.16...v1.3.0) (2025-10-24)
 
 
