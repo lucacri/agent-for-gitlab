@@ -46,12 +46,14 @@ export async function runClaude(context, prompt) {
 
   logger.info(`Claude args: ${args.join(' ')}`);
 
-  const result = spawnSync('claude', args, {
+  // Execute the Claude CLI directly via Node.js to avoid symlink resolution issues
+  // The npm package installs cli.js and creates a symlink at /usr/bin/claude
+  const cliPath = '/usr/lib/node_modules/@anthropic-ai/claude-code/cli.js';
+  const result = spawnSync('node', [cliPath, ...args], {
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'pipe'],
     maxBuffer: 10 * 1024 * 1024,
-    cwd: '/opt/agent/repo',
-    shell: true
+    cwd: '/opt/agent/repo'
   });
 
   if (result.error) {
