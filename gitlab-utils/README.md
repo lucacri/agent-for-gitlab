@@ -25,17 +25,17 @@ This directory contains example GitLab CI/CD configurations for the AI agent web
 
 **Use this if:**
 - ✅ You have a self-hosted GitLab runner
-- ✅ You want to manage Claude credentials as files on the runner host
-- ✅ You need custom volume mounts (SSL certs, configs, etc.)
+- ✅ You have a private GitLab instance with custom SSL certificates
+- ✅ You need to mount /etc/ssl/certs for SSL verification
 - ✅ You want full control over the Docker container execution
 
 **Authentication method:**
-- Mounted profile directory: `~/agent-for-gitlab/.claude/`
+- `CLAUDE_CODE_OAUTH_TOKEN` environment variable (same as Docker executor)
 
 **Setup:**
-1. Create profile directory on runner host
+1. Ensure gitlab-runner user can run Docker
 2. Copy to your project root as `.gitlab-ci.yml`
-3. Follow setup instructions in the file
+3. Set `CLAUDE_CODE_OAUTH_TOKEN` in CI/CD variables
 
 ---
 
@@ -44,18 +44,18 @@ This directory contains example GitLab CI/CD configurations for the AI agent web
 | Feature | Docker Executor | Shell Executor |
 |---------|----------------|----------------|
 | **Runner type** | Any (shared/dedicated) | Self-hosted only |
-| **Setup complexity** | Simple (just CI/CD vars) | Moderate (host setup required) |
-| **Authentication** | Environment variables | Mounted files or env vars |
-| **Credential management** | GitLab UI | Files on runner host |
-| **Volume control** | Limited | Full control |
-| **SSL certificates** | Auto-handled | Manual mount |
-| **Best for** | Cloud/shared runners | Self-hosted runners |
+| **Setup complexity** | Simple (just CI/CD vars) | Simple (CI/CD vars + Docker permission) |
+| **Authentication** | Environment variables | Environment variables |
+| **Credential management** | GitLab UI | GitLab UI |
+| **Volume control** | Limited | Full control (docker run) |
+| **SSL certificates** | Auto-handled | Manual mount (included in example) |
+| **Best for** | Cloud/shared runners | Private GitLab instances with custom SSL |
 
 ---
 
 ## Authentication Quick Reference
 
-### Method 1: `CLAUDE_CODE_OAUTH_TOKEN` (Easiest)
+### Method 1: `CLAUDE_CODE_OAUTH_TOKEN` (Recommended)
 ```bash
 # In GitLab Settings → CI/CD → Variables
 CLAUDE_CODE_OAUTH_TOKEN = sk-ant-oat01-xxxxx
@@ -63,27 +63,11 @@ CLAUDE_CODE_OAUTH_TOKEN = sk-ant-oat01-xxxxx
 
 **Works with:** Both configurations
 **Setup time:** 2 minutes
-**Best for:** Most users
+**Best for:** Most users (simplest method)
 
 ---
 
-### Method 2: Mounted Profile (Most Flexible)
-```bash
-# On GitLab runner host
-mkdir -p ~/agent-for-gitlab/.claude
-docker run -it --rm \
-  -v ~/agent-for-gitlab/.claude:/root/.claude:rw \
-  lucacri/agent-for-gitlab:latest \
-  sh -c "claude login"
-```
-
-**Works with:** Shell executor only
-**Setup time:** 5 minutes
-**Best for:** Self-hosted runners, profile management
-
----
-
-### Method 3: `CLAUDE_CREDENTIALS` (File Variable)
+### Method 2: `CLAUDE_CREDENTIALS` (File Variable)
 ```bash
 # In GitLab Settings → CI/CD → Variables
 CLAUDE_CREDENTIALS = <contents of ~/.claude/.credentials.json>
@@ -120,20 +104,22 @@ git push
 ### Shell Executor Setup
 
 ```bash
-# 1. On GitLab runner host, create profile
+# 1. Ensure gitlab-runner user can run Docker (on runner host)
 ssh runner-host
-mkdir -p ~/agent-for-gitlab/.claude
-docker run -it --rm \
-  -v ~/agent-for-gitlab/.claude:/root/.claude:rw \
-  lucacri/agent-for-gitlab:latest \
-  sh -c "claude login"
-chmod 700 ~/agent-for-gitlab/.claude
-chmod 600 ~/agent-for-gitlab/.claude/.credentials.json
+sudo usermod -aG docker gitlab-runner
+sudo gitlab-runner restart
 
 # 2. Copy the configuration (on your local machine)
 cp gitlab-utils/.gitlab-ci.shell-executor.yml .gitlab-ci.yml
 
-# 3. Commit and push
+# 3. Set CI/CD variables in GitLab
+#    Settings → CI/CD → Variables → Add variable
+#    Name: CLAUDE_CODE_OAUTH_TOKEN
+#    Value: sk-ant-oat01-xxxxx
+#    Type: Variable
+#    Flags: ✅ Masked
+
+# 4. Commit and push
 git add .gitlab-ci.yml
 git commit -m "Add AI agent configuration (shell executor)"
 git push
@@ -149,18 +135,13 @@ git push
 |----------|-------------|------------|
 | `GITLAB_TOKEN` | GitLab Personal Access Token | Settings → Access Tokens → Create (scopes: `api`, `read_repository`, `write_repository`) |
 
-### Docker Executor Also Requires ONE of:
+### Both Also Require ONE of:
 
 | Variable | Type | Description |
 |----------|------|-------------|
 | `CLAUDE_CODE_OAUTH_TOKEN` | Variable | OAuth token from Claude (recommended) |
-| `CLAUDE_CREDENTIALS` | File | Contents of `~/.claude/.credentials.json` |
+| `CLAUDE_CREDENTIALS` | File | Contents of `~/.claude/.credentials.json` (Docker executor only) |
 | `ANTHROPIC_API_KEY` | Variable | Anthropic API key |
-
-### Shell Executor:
-
-- **No Claude auth variables needed** if using mounted profile
-- Or use `CLAUDE_CODE_OAUTH_TOKEN` for environment-based auth
 
 ---
 
@@ -170,19 +151,20 @@ git push
 **Solution:** Add `GITLAB_TOKEN` to Settings → CI/CD → Variables
 
 ### "Claude authentication failed"
-**Solution:** Verify your chosen auth method is set up correctly:
-- Docker: Check CI/CD variables
-- Shell: Check `~/agent-for-gitlab/.claude/.credentials.json` exists on runner host
+**Solution:** Check CI/CD variables are set correctly:
+- Verify `CLAUDE_CODE_OAUTH_TOKEN` or other auth variable exists
+- Ensure it's marked as "Masked"
+- Get a new token from https://claude.ai/settings/tokens
 
 ### "SSL certificate problem"
 **Shell executor:** Ensure `/etc/ssl/certs` is mounted (already in example)
 **Docker executor:** Should be handled automatically
 
-### "Permission denied" (shell executor)
-**Solution:** Check file permissions on runner host
+### "docker: command not found" (shell executor)
+**Solution:** gitlab-runner user needs Docker access
 ```bash
-chmod 700 ~/agent-for-gitlab/.claude
-chmod 600 ~/agent-for-gitlab/.claude/.credentials.json
+sudo usermod -aG docker gitlab-runner
+sudo gitlab-runner restart
 ```
 
 ---

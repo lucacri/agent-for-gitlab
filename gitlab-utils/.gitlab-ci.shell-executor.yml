@@ -2,11 +2,11 @@
 # SHELL EXECUTOR VERSION with Docker Run
 #
 # This version uses the shell executor and runs the agent via `docker run`
-# This gives you full control over volume mounts and is ideal for:
-# - Self-hosted GitLab runners
-# - Local development and testing
-# - Custom Claude profile management
+# Ideal for:
+# - Self-hosted GitLab runners with custom SSL certificates
+# - Private GitLab instances that need SSL cert mounting
 # - Advanced Docker configuration needs
+# - Full control over container execution
 
 stages:
   - ai
@@ -16,11 +16,6 @@ variables:
   # Available at: https://hub.docker.com/r/lucacri/agent-for-gitlab
   AI_AGENT_IMAGE: "lucacri/agent-for-gitlab:latest"
 
-  # Location of Claude profile on the GitLab runner host
-  # Default: ~/agent-for-gitlab
-  # This directory should contain .claude/ folder and optionally .claude.json
-  CLAUDE_PROFILE_DIR: "~/agent-for-gitlab"
-
   # AI_MODEL: Claude model to use (optional, defaults to "sonnet")
   # Options: "sonnet", "opus", "haiku", or full model ID like "claude-sonnet-4-20250514"
   # AI_MODEL: "sonnet"
@@ -29,62 +24,33 @@ variables:
   # AI_INSTRUCTIONS: "You are a helpful coding assistant"
 
 # ============================================================================
-# SETUP REQUIRED ON GITLAB RUNNER HOST:
+# REQUIRED CI/CD VARIABLES (Settings → CI/CD → Variables):
 # ============================================================================
 #
-# 1. Create Claude profile directory:
-#    mkdir -p ~/agent-for-gitlab/.claude
+# 1. CLAUDE_CODE_OAUTH_TOKEN (required)
+#    - Value: sk-ant-oat01-xxxxx (your Claude OAuth token)
+#    - Type: Variable
+#    - Flags: ✅ Masked
+#    - Get it from: https://claude.ai/settings/tokens
 #
-# 2. Add credentials to the profile:
-#
-#    Option A: Interactive login (recommended)
-#      docker run -it --rm \
-#        -v ~/agent-for-gitlab/.claude:/root/.claude:rw \
-#        lucacri/agent-for-gitlab:latest \
-#        sh -c "claude login && exit"
-#
-#    Option B: Copy existing credentials
-#      cp ~/.claude/.credentials.json ~/agent-for-gitlab/.claude/
-#
-# 3. (Optional) Create Claude configuration:
-#    cat > ~/agent-for-gitlab/.claude.json <<EOF
-#    {
-#      "defaultModel": "sonnet",
-#      "maxTokens": 8192
-#    }
-#    EOF
-#
-# 4. Set permissions:
-#    chmod 700 ~/agent-for-gitlab/.claude
-#    chmod 600 ~/agent-for-gitlab/.claude/.credentials.json
-#    chmod 600 ~/agent-for-gitlab/.claude.json
-#
-# 5. Ensure gitlab-runner user can run Docker:
-#    sudo usermod -aG docker gitlab-runner
-#    sudo gitlab-runner restart
+# 2. GITLAB_TOKEN (required)
+#    - Value: glpat-xxxxx (GitLab Personal Access Token)
+#    - Type: Variable
+#    - Flags: ✅ Masked
+#    - Scopes: api, read_repository, write_repository
+#    - Get it from: Settings → Access Tokens
 #
 # ============================================================================
 
 # ============================================================================
-# AUTHENTICATION METHODS:
+# RUNNER HOST SETUP (One-time):
 # ============================================================================
 #
-# Method 1: Mounted Profile (RECOMMENDED for shell executor)
-#   - Creates profile directory on runner host: ~/agent-for-gitlab/
-#   - Contains .claude/ folder with credentials
-#   - Optionally contains .claude.json for configuration
-#   - No CI/CD variables needed for Claude auth!
-#   - Easy to update: just edit files on host
+# Ensure gitlab-runner user can run Docker:
+#   sudo usermod -aG docker gitlab-runner
+#   sudo gitlab-runner restart
 #
-# Method 2: Environment Variable
-#   - Set CLAUDE_CODE_OAUTH_TOKEN in GitLab CI/CD variables
-#   - Value: sk-ant-oat01-xxxxx (your OAuth token)
-#   - Type: Variable, Flags: ✅ Masked
-#   - Simpler but less flexible than mounted profile
-#
-# Method 3: Hybrid
-#   - Use mounted profile for credentials
-#   - Use environment variables for per-project configuration
+# That's it! No credential files or profile directories needed.
 #
 # ============================================================================
 
@@ -94,13 +60,12 @@ ai_webhook_handler:
     - shell  # MUST use shell executor (not docker executor)
 
   script:
-    # Run the agent container with volume mounts
+    # Run the agent container with docker run
     - |
       docker run --rm \
         -v /etc/ssl/certs:/etc/ssl/certs:ro \
-        -v ${CLAUDE_PROFILE_DIR}/.claude:/root/.claude:rw \
-        -v ${CLAUDE_PROFILE_DIR}/.claude.json:/root/.claude.json:rw \
         -v $(pwd):/opt/agent/repo \
+        -e CLAUDE_CODE_OAUTH_TOKEN="${CLAUDE_CODE_OAUTH_TOKEN}" \
         -e GITLAB_TOKEN="${GITLAB_TOKEN}" \
         -e CI_SERVER_HOST="${CI_SERVER_HOST}" \
         -e CI_SERVER_URL="${CI_SERVER_URL}" \
@@ -137,19 +102,37 @@ ai_webhook_handler:
 # ============================================================================
 #
 # -v /etc/ssl/certs:/etc/ssl/certs:ro
-#   → Mounts system SSL certificates (required for private GitLab instances)
-#
-# -v ${CLAUDE_PROFILE_DIR}/.claude:/root/.claude:rw
-#   → Mounts Claude credentials directory (contains .credentials.json)
-#   → Read-write so Claude can update session data
-#
-# -v ${CLAUDE_PROFILE_DIR}/.claude.json:/root/.claude.json:rw
-#   → Mounts Claude configuration file (optional)
-#   → Read-write so you can update config from host
+#   → Mounts system SSL certificates
+#   → Required for private GitLab instances with custom SSL certs
+#   → Read-only mount for security
 #
 # -v $(pwd):/opt/agent/repo
 #   → Mounts the Git repository into the container
-#   → $(pwd) is the GitLab checkout directory
+#   → $(pwd) is the GitLab checkout directory (/home/gitlab-runner/builds/...)
+#   → Agent can read code, make changes, and commit
+#
+# ============================================================================
+
+# ============================================================================
+# WHY USE SHELL EXECUTOR INSTEAD OF DOCKER EXECUTOR?
+# ============================================================================
+#
+# The shell executor with `docker run` gives you:
+#
+# 1. SSL Certificate Control
+#    - Mount /etc/ssl/certs for private GitLab instances
+#    - Docker executor may not have access to custom SSL certs
+#
+# 2. Full Docker Control
+#    - Complete control over docker run parameters
+#    - Can add custom volume mounts as needed
+#    - Easier debugging (can run same command manually)
+#
+# 3. Environment Flexibility
+#    - Can run on any machine with Docker
+#    - Not limited to GitLab's Docker executor capabilities
+#
+# Otherwise, prefer the simpler Docker executor version (.gitlab-ci.yml)
 #
 # ============================================================================
 
@@ -157,61 +140,43 @@ ai_webhook_handler:
 # TROUBLESHOOTING:
 # ============================================================================
 #
-# Error: "Permission denied" accessing mounted files
-#   Solution: Check file permissions on host
-#     chmod 700 ~/agent-for-gitlab/.claude
-#     chmod 600 ~/agent-for-gitlab/.claude/.credentials.json
-#
-# Error: "No such file or directory" for mounted files
-#   Solution: Verify files exist on runner host
-#     ls -la ~/agent-for-gitlab/.claude/
-#
 # Error: "Problem with the SSL CA cert"
-#   Solution: Ensure /etc/ssl/certs is mounted
-#     Already included in script above
+#   Cause: Private GitLab instance with custom SSL certificate
+#   Solution: Already fixed - /etc/ssl/certs is mounted in script above
+#
+# Error: "docker: command not found"
+#   Cause: gitlab-runner user can't access Docker
+#   Solution:
+#     sudo usermod -aG docker gitlab-runner
+#     sudo gitlab-runner restart
+#
+# Error: "Authentication failed" (401) from GitLab
+#   Cause: GITLAB_TOKEN not set or invalid
+#   Solution:
+#     1. Check Settings → CI/CD → Variables → GITLAB_TOKEN exists
+#     2. Verify token has scopes: api, read_repository, write_repository
+#     3. Ensure token isn't expired
+#
+# Error: "Claude authentication failed"
+#   Cause: CLAUDE_CODE_OAUTH_TOKEN not set or invalid
+#   Solution:
+#     1. Check Settings → CI/CD → Variables → CLAUDE_CODE_OAUTH_TOKEN exists
+#     2. Get new token from https://claude.ai/settings/tokens
+#     3. Ensure variable is marked as "Masked"
 #
 # Error: "dubious ownership in repository"
-#   Solution: Already fixed in latest image (v2025-10-24+)
-#     Rebuild image if using older version
+#   Cause: Git ownership check (old image version)
+#   Solution: Use latest image (already fixed in v2025-10-24+)
 #
-# Error: "Authentication failed" (401)
-#   Solution: Check GITLAB_TOKEN is set in CI/CD variables
-#     Settings → CI/CD → Variables → GITLAB_TOKEN
-#
-# Claude auth error but files exist
-#   Solution: Test credentials manually:
-#     docker run -it --rm \
-#       -v ~/agent-for-gitlab/.claude:/root/.claude:ro \
+# Test the setup manually:
+#   ssh to your GitLab runner host and run:
+#     cd /path/to/some/git/repo
+#     docker run --rm \
+#       -v /etc/ssl/certs:/etc/ssl/certs:ro \
+#       -v $(pwd):/opt/agent/repo \
+#       -e CLAUDE_CODE_OAUTH_TOKEN="sk-ant-oat01-xxxxx" \
+#       -e GITLAB_TOKEN="glpat-xxxxx" \
 #       lucacri/agent-for-gitlab:latest \
-#       sh -c "ls -la ~/.claude/ && cat ~/.claude/.credentials.json"
-#
-# ============================================================================
-
-# ============================================================================
-# ADVANCED: MULTIPLE PROFILES
-# ============================================================================
-#
-# You can maintain multiple Claude profiles on the runner host:
-#
-# ~/agent-for-gitlab/profiles/
-# ├── production/.claude/
-# ├── development/.claude/
-# └── testing/.claude/
-#
-# Then use different variables or runner tags to select profiles:
-#
-# ai_production:
-#   extends: .ai_base
-#   variables:
-#     CLAUDE_PROFILE_DIR: "~/agent-for-gitlab/profiles/production"
-#   only:
-#     - main
-#
-# ai_development:
-#   extends: .ai_base
-#   variables:
-#     CLAUDE_PROFILE_DIR: "~/agent-for-gitlab/profiles/development"
-#   only:
-#     - develop
+#       sh -c "which claude && claude --version"
 #
 # ============================================================================
