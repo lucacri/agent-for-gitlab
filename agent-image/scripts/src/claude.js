@@ -7,21 +7,27 @@ import logger from './logger.js';
 export function checkClaudeAuth() {
   const credPath = join(homedir(), '.claude', '.credentials.json');
 
-  if (!existsSync(credPath) && !process.env.ANTHROPIC_API_KEY) {
+  if (!existsSync(credPath) &&
+      !process.env.ANTHROPIC_API_KEY &&
+      !process.env.CLAUDE_CODE_OAUTH_TOKEN) {
     throw new Error(
       'Claude Code authentication not configured.\n' +
       'Choose one of the following methods:\n' +
-      '  1. Mount credentials: -v ~/.claude:/root/.claude (for docker run)\n' +
-      '  2. CI/CD variable: CLAUDE_CREDENTIALS (file type)\n' +
-      '  3. CI/CD variable: ANTHROPIC_API_KEY (masked)\n' +
+      '  1. Environment variable: CLAUDE_CODE_OAUTH_TOKEN (recommended for CI/CD)\n' +
+      '  2. Mount credentials: -v ~/.claude:/root/.claude (for docker run)\n' +
+      '  3. CI/CD variable: CLAUDE_CREDENTIALS (file type)\n' +
+      '  4. Environment variable: ANTHROPIC_API_KEY\n' +
       `\nChecked locations:\n` +
       `  - ${credPath}: ${existsSync(credPath) ? 'found' : 'not found'}\n` +
+      `  - CLAUDE_CODE_OAUTH_TOKEN: ${process.env.CLAUDE_CODE_OAUTH_TOKEN ? 'set' : 'not set'}\n` +
       `  - ANTHROPIC_API_KEY: ${process.env.ANTHROPIC_API_KEY ? 'set' : 'not set'}`
     );
   }
 
   // Log which authentication method is being used
-  if (existsSync(credPath)) {
+  if (process.env.CLAUDE_CODE_OAUTH_TOKEN) {
+    logger.info('Using CLAUDE_CODE_OAUTH_TOKEN environment variable');
+  } else if (existsSync(credPath)) {
     logger.info('Using credentials from mounted file: ~/.claude/.credentials.json');
   } else if (process.env.ANTHROPIC_API_KEY) {
     logger.info('Using ANTHROPIC_API_KEY environment variable');
