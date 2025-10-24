@@ -46,22 +46,12 @@ export async function runClaude(context, prompt) {
 
   logger.info(`Claude args: ${args.join(' ')}`);
 
-  // Execute the Claude CLI directly via Node.js to avoid symlink resolution issues
-  // The npm package installs cli.js and creates a symlink at /usr/bin/claude
-  const cliPath = '/usr/lib/node_modules/@anthropic-ai/claude-code/cli.js';
+  // Execute the Claude CLI using the absolute path to the installed binary
+  const claudePath = '/usr/bin/claude';
 
-  // Debug: Verify CLI file exists before execution
-  if (!existsSync(cliPath)) {
-    logger.error(`CLI file not found at: ${cliPath}`);
-    throw new Error(
-      `Claude CLI file not found at ${cliPath}\n` +
-      `Check if @anthropic-ai/claude-code is installed correctly.`
-    );
-  }
+  logger.info(`Executing: ${claudePath} ${args.join(' ')}`);
 
-  logger.info(`Executing: node ${cliPath} ${args.join(' ')}`);
-
-  const result = spawnSync('node', [cliPath, ...args], {
+  const result = spawnSync(claudePath, args, {
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'pipe'],
     maxBuffer: 10 * 1024 * 1024,
@@ -75,11 +65,11 @@ export async function runClaude(context, prompt) {
 
     if (result.error.code === 'ENOENT') {
       throw new Error(
-        `Failed to execute command.\n` +
+        `Failed to execute Claude CLI.\n` +
         `Error: ${result.error.message}\n` +
-        `Command: node ${cliPath}\n` +
+        `CLI path: ${claudePath}\n` +
         `Working directory: /opt/agent/repo\n` +
-        `Check that 'node' is in PATH and the working directory exists.`
+        `Check that Claude Code CLI is installed correctly.`
       );
     }
     throw result.error;
