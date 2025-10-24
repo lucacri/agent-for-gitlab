@@ -10,8 +10,21 @@ export function checkClaudeAuth() {
   if (!existsSync(credPath) && !process.env.ANTHROPIC_API_KEY) {
     throw new Error(
       'Claude Code authentication not configured.\n' +
-      'Set CI/CD variable: CLAUDE_CREDENTIALS (file type) or ANTHROPIC_API_KEY'
+      'Choose one of the following methods:\n' +
+      '  1. Mount credentials: -v ~/.claude:/root/.claude (for docker run)\n' +
+      '  2. CI/CD variable: CLAUDE_CREDENTIALS (file type)\n' +
+      '  3. CI/CD variable: ANTHROPIC_API_KEY (masked)\n' +
+      `\nChecked locations:\n` +
+      `  - ${credPath}: ${existsSync(credPath) ? 'found' : 'not found'}\n` +
+      `  - ANTHROPIC_API_KEY: ${process.env.ANTHROPIC_API_KEY ? 'set' : 'not set'}`
     );
+  }
+
+  // Log which authentication method is being used
+  if (existsSync(credPath)) {
+    logger.info('Using credentials from mounted file: ~/.claude/.credentials.json');
+  } else if (process.env.ANTHROPIC_API_KEY) {
+    logger.info('Using ANTHROPIC_API_KEY environment variable');
   }
 }
 
