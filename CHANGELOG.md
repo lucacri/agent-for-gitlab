@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.1...v1.2.2) (2025-10-24)
+
+
+### Bug Fixes
+
+* migrate GitHub workflows from GHCR to Docker Hub ([093b9f7](https://github.com/lucacri/agent-for-gitlab/commit/093b9f74f2acb419c8bf3e1f9314083decab0263))
+
 ## [1.2.1](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.0...v1.2.1) (2025-10-24)
 
 
