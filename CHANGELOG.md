@@ -1,3 +1,10 @@
+## [1.2.7](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.6...v1.2.7) (2025-10-24)
+
+
+### Bug Fixes
+
+* execute /usr/bin/claude directly instead of via node ([68e680a](https://github.com/lucacri/agent-for-gitlab/commit/68e680a10650b2fd9ac5d5561517896af7b2c698))
+
 ## [1.2.6](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.5...v1.2.6) (2025-10-24)
 
 
