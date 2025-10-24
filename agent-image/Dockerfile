@@ -54,6 +54,10 @@ ENV IS_SANDBOX=1
 # Create version file for debugging
 RUN echo "v2025-10-24-debug-spawnSync" > /version.txt
 
+# Configure Git to trust the repo directory (for mounted volumes from different users)
+RUN git config --global --add safe.directory /opt/agent/repo && \
+    git config --global --add safe.directory '*'
+
 # Set entrypoint to handle configuration mounting
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
