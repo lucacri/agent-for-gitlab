@@ -1,3 +1,10 @@
+## [1.2.10](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.9...v1.2.10) (2025-10-24)
+
+
+### Bug Fixes
+
+* use full path for Claude CLI execution and add version tracking ([1f61c79](https://github.com/lucacri/agent-for-gitlab/commit/1f61c791c2dcd3a460abd68775fde85301dadf46))
+
 ## [1.2.9](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.8...v1.2.9) (2025-10-24)
 
 
