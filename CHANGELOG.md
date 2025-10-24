@@ -1,3 +1,10 @@
+## [1.3.0](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.16...v1.3.0) (2025-10-24)
+
+
+### Features
+
+* add CLAUDE_CODE_OAUTH_TOKEN as primary auth method ([3bb6f15](https://github.com/lucacri/agent-for-gitlab/commit/3bb6f152123762ce042f92025c04cc5d1987ac1c))
+
 ## [1.2.16](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.15...v1.2.16) (2025-10-24)
 
 
