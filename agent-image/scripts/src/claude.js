@@ -34,8 +34,15 @@ export async function runClaude(context, prompt) {
 
   checkClaudeAuth();
 
+  // Handle empty prompt - provide a default
+  const actualPrompt = prompt?.trim() || 'Review the current code and provide analysis or suggestions.';
+
+  if (!prompt?.trim()) {
+    logger.info('No prompt provided, using default prompt');
+  }
+
   const args = [
-    '-p', prompt,
+    '-p', actualPrompt,
     '--model', getClaudeModel(context.aiModel),
     '--dangerously-skip-permissions'
   ];
