@@ -21,15 +21,16 @@ export function gitSetup(context) {
   }
 
   // Prepare credential approval input
+  // For GitLab Personal Access Tokens, use 'oauth2' as username (GitLab standard)
   const credentialInput = [
     "protocol=https",
     `host=${context.host}`,
-    `username=${context.username}`,
+    `username=oauth2`,
     `password=${context.gitlabToken}`,
     "",
   ].join("\n");
 
-  logger.info(`Configured git for host ${context.host} as user ${context.username}`);
+  logger.info(`Configured git for host ${context.host} with token authentication`);
 
   // Approve credentials for git
   execFileSync("git", ["credential", "approve"], {
