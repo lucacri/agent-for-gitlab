@@ -1,3 +1,10 @@
+## [1.2.5](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.4...v1.2.5) (2025-10-24)
+
+
+### Bug Fixes
+
+* add shell option to claude CLI spawn for symlink resolution ([e142c01](https://github.com/lucacri/agent-for-gitlab/commit/e142c019602789bc48abf1fcf440ede5c98778c0))
+
 ## [1.2.4](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.3...v1.2.4) (2025-10-24)
 
 
