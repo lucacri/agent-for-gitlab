@@ -1,3 +1,10 @@
+## [1.2.6](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.5...v1.2.6) (2025-10-24)
+
+
+### Bug Fixes
+
+* execute Claude CLI directly via Node.js instead of symlink ([f83df1b](https://github.com/lucacri/agent-for-gitlab/commit/f83df1b13b9af0d52fb377e0d42aba668283fe85))
+
 ## [1.2.5](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.4...v1.2.5) (2025-10-24)
 
 
