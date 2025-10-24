@@ -64,36 +64,20 @@ export async function runClaude(context, prompt) {
 
   logger.info(`Found Claude CLI at: ${claudePath}`);
 
-  // Debug: Inspect the claude binary
-  const lsResult = spawnSync('ls', ['-la', claudePath], {
-    encoding: 'utf8',
-    env: process.env
-  });
-  logger.info(`ls -la ${claudePath}: ${lsResult.stdout || 'no output'}`);
-
-  const fileResult = spawnSync('file', [claudePath], {
-    encoding: 'utf8',
-    env: process.env
-  });
-  logger.info(`file ${claudePath}: ${fileResult.stdout || 'no output'}`);
-
+  // Get the real path (resolves symlinks)
   const readlinkResult = spawnSync('readlink', ['-f', claudePath], {
     encoding: 'utf8',
     env: process.env
   });
-  logger.info(`readlink -f ${claudePath}: ${readlinkResult.stdout?.trim() || 'not a symlink'}`);
 
-  // If it's a script, check the shebang
-  const headResult = spawnSync('head', ['-n', '1', claudePath], {
-    encoding: 'utf8',
-    env: process.env
-  });
-  logger.info(`First line of ${claudePath}: ${headResult.stdout?.trim() || 'no output'}`);
+  const realPath = readlinkResult.stdout?.trim() || claudePath;
+  logger.info(`Real path: ${realPath}`);
 
-  logger.info(`Executing: ${claudePath} ${args.join(' ')}`);
+  // Execute with node explicitly instead of relying on shebang
+  // This avoids issues with #!/usr/bin/env node not finding node in spawnSync context
+  logger.info(`Executing: node ${realPath} ${args.join(' ')}`);
 
-  // Use full path instead of relying on PATH resolution in spawnSync
-  const result = spawnSync(claudePath, args, {
+  const result = spawnSync('node', [realPath, ...args], {
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'pipe'],
     maxBuffer: 10 * 1024 * 1024,
