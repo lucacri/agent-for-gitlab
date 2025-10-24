@@ -17,21 +17,61 @@ variables:
   # AI_INSTRUCTIONS: Custom system prompt to append to Claude's instructions (optional)
   # AI_INSTRUCTIONS: "You are a helpful coding assistant"
 
+# ============================================================================
+# AUTHENTICATION SETUP (Choose ONE method):
+# ============================================================================
+#
+# Option 1: CLAUDE_CODE_OAUTH_TOKEN (RECOMMENDED - Simplest for CI/CD)
+#   - Go to Settings → CI/CD → Variables
+#   - Add variable: CLAUDE_CODE_OAUTH_TOKEN
+#   - Value: sk-ant-oat01-xxxxx (your OAuth token)
+#   - Type: Variable
+#   - Flags: ✅ Masked
+#   - No before_script needed!
+#
+# Option 2: CLAUDE_CREDENTIALS (File-based)
+#   - Go to Settings → CI/CD → Variables
+#   - Add variable: CLAUDE_CREDENTIALS
+#   - Value: Contents of ~/.claude/.credentials.json
+#   - Type: File
+#   - Flags: ✅ Masked
+#   - Uses before_script below to install credentials
+#
+# Option 3: ANTHROPIC_API_KEY
+#   - Go to Settings → CI/CD → Variables
+#   - Add variable: ANTHROPIC_API_KEY
+#   - Value: sk-ant-api03-xxxxx
+#   - Type: Variable
+#   - Flags: ✅ Masked
+#   - No before_script needed!
+#
+# ============================================================================
+
 ai_webhook_handler:
   stage: ai
   image: $AI_AGENT_IMAGE
+  tags:
+    - docker
+
   before_script:
-    # Setup Claude Code authentication
+    # Setup Claude Code authentication (only needed for CLAUDE_CREDENTIALS method)
     - mkdir -p ~/.claude
     - |
       if [ -n "$CLAUDE_CREDENTIALS" ]; then
         echo "$CLAUDE_CREDENTIALS" > ~/.claude/.credentials.json
+        chmod 600 ~/.claude/.credentials.json
       fi
+
   script:
     - ai-runner
+
   rules:
+    # Only run when triggered by @ai comment webhook
     - if: '$AI_TRIGGER == "true"'
+
   artifacts:
     paths:
       - ai-output.json
     expire_in: 1 week
+
+  allow_failure: true  # Don't block other pipelines if AI fails
