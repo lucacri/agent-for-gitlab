@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.3...v1.2.4) (2025-10-24)
+
+
+### Bug Fixes
+
+* correct Docker mount syntax for .claude.json file ([16adaca](https://github.com/lucacri/agent-for-gitlab/commit/16adaca0e527308d9b2a820d75a81b6ed4589ec7))
+
 ## [1.2.3](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.2...v1.2.3) (2025-10-24)
 
 
