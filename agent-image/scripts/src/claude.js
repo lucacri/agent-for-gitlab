@@ -50,7 +50,8 @@ export async function runClaude(context, prompt) {
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'pipe'],
     maxBuffer: 10 * 1024 * 1024,
-    cwd: '/opt/agent/repo'
+    cwd: '/opt/agent/repo',
+    shell: true
   });
 
   if (result.error) {
