@@ -1,3 +1,10 @@
+## [1.2.9](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.8...v1.2.9) (2025-10-24)
+
+
+### Bug Fixes
+
+* add IS_SANDBOX=1 environment variable for Claude Code CLI in Docker ([1b09b31](https://github.com/lucacri/agent-for-gitlab/commit/1b09b31e99f760909f937287eb13a05056a0a1b6))
+
 ## [1.2.8](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.7...v1.2.8) (2025-10-24)
 
 
