@@ -1,3 +1,10 @@
+## [1.2.8](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.7...v1.2.8) (2025-10-24)
+
+
+### Bug Fixes
+
+* use PATH resolution for claude binary instead of hardcoded path ([f7dc791](https://github.com/lucacri/agent-for-gitlab/commit/f7dc7910046c86a0162c9aed2993918e45dbdc04))
+
 ## [1.2.7](https://github.com/lucacri/agent-for-gitlab/compare/v1.2.6...v1.2.7) (2025-10-24)
 
 
