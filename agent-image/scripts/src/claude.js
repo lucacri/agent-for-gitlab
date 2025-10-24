@@ -49,6 +49,18 @@ export async function runClaude(context, prompt) {
   // Execute the Claude CLI directly via Node.js to avoid symlink resolution issues
   // The npm package installs cli.js and creates a symlink at /usr/bin/claude
   const cliPath = '/usr/lib/node_modules/@anthropic-ai/claude-code/cli.js';
+
+  // Debug: Verify CLI file exists before execution
+  if (!existsSync(cliPath)) {
+    logger.error(`CLI file not found at: ${cliPath}`);
+    throw new Error(
+      `Claude CLI file not found at ${cliPath}\n` +
+      `Check if @anthropic-ai/claude-code is installed correctly.`
+    );
+  }
+
+  logger.info(`Executing: node ${cliPath} ${args.join(' ')}`);
+
   const result = spawnSync('node', [cliPath, ...args], {
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'pipe'],
@@ -57,8 +69,18 @@ export async function runClaude(context, prompt) {
   });
 
   if (result.error) {
+    logger.error(`Spawn error occurred: ${result.error.message}`);
+    logger.error(`Error code: ${result.error.code}`);
+    logger.error(`Error details: ${JSON.stringify(result.error)}`);
+
     if (result.error.code === 'ENOENT') {
-      throw new Error('Claude Code CLI not found. Check Docker image build.');
+      throw new Error(
+        `Failed to execute command.\n` +
+        `Error: ${result.error.message}\n` +
+        `Command: node ${cliPath}\n` +
+        `Working directory: /opt/agent/repo\n` +
+        `Check that 'node' is in PATH and the working directory exists.`
+      );
     }
     throw result.error;
   }
